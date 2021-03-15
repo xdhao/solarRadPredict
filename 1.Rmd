@@ -1,0 +1,125 @@
+---
+title: "Machine learning Labwork 1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Loading data
+
+```{r}
+url <- "https://raw.githubusercontent.com/xdhao/solarRadPredict/main/SolarPrediction.csv"
+SolarPrediction <- read.csv(url)
+```
+
+#### Solar Radiation
+
+These datasets are meteorological data from the HI-SEAS weather station from four months (September through December 2016) between Mission IV and Mission V.
+
+For each dataset, the fields are:
+
+A row number (1-n) useful in sorting this export's results
+The UNIX time_t date (seconds since Jan 1, 1970). Useful in sorting this export's results with other export's results
+The date in yyyy-mm-dd format
+The local time of day in hh:mm:ss 24-hour format
+The numeric data, if any (may be an empty string)
+The text data, if any (may be an empty string)
+
+The units of each dataset are:
+
+1. Solar radiation: watts per meter^2
+2. Temperature: degrees Fahrenheit
+3. Humidity: percent
+4. Barometric pressure: Hg
+5. Wind direction: degrees
+6. Wind speed: miles per hour
+7. Sunrise/sunset: Hawaii time
+
+## General dataset parameters
+
+#### First 5 rows
+
+```{r}
+library(knitr)
+kable(SolarPrediction[1:5,], caption = "dataset parameters")
+```
+
+#### Dataset dimension
+
+```{r}
+SolarPrediction.dim <- dim(SolarPrediction)
+```
+
+Dataset contains 32686 rows and 11 columns.
+
+#### Columns list
+
+```{r}
+str(SolarPrediction)
+```
+
+#### Basic statistical characteristics of the dataset
+
+```{r SolarPrediction}
+summary(SolarPrediction)
+```
+
+## Data visualization
+
+```{r}
+library(ggplot2)
+ggplot(SolarPrediction, aes(x=Temperature)) + geom_histogram(binwidth = 1)
+```
+
+```{r}
+ggplot(SolarPrediction, aes(x=Temperature, y=Radiation)) + geom_point()
+```
+
+```{r}
+ggplot(SolarPrediction, aes(x=Pressure, y=WindDirection.Degrees.)) + geom_point()
+```
+
+```{r}
+ggplot(SolarPrediction, aes(x=Data, y=TimeSunRise)) + geom_point()
+```
+
+```{r}
+pairs(~  Radiation + Temperature + Humidity + WindDirection.Degrees. + Speed, data = SolarPrediction, main = 'Solar Prediction Data')
+```
+
+## Feature correlation
+
+```{r, echo=FALSE}
+library(corrplot)
+library(RColorBrewer)
+```
+
+```{r, echo=FALSE}
+x <- SolarPrediction[4:9]
+y <- SolarPrediction[4:9]
+cor(x, y)
+```
+
+```{r, echo=FALSE}
+M <-cor(x, y)
+corrplot(M, type="upper", order="hclust",
+         col=brewer.pal(n=8, name="RdYlBu"))
+```
+
+## Normalization
+
+```{r, echo=FALSE}
+library(caret)
+```
+
+```{r, echo=FALSE}
+prep_data <- preProcess(SolarPrediction[,c(4,5,6,7,8,9)], method = c("range"))
+norm1 <- predict(prep_data, SolarPrediction[,c(4,5,6,7,8,9)])
+summary(norm1)
+```
+
+## Conclusion
+
+The results of the exploratory data analysis are the main statistical characteristics of the dataset features, the determination of the need to remove noise from data, the elimination of highly correlated parameters.
